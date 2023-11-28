@@ -31,7 +31,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('clients')->group(function () {
         Route::middleware(ApiAuthMiddleware::class)->group(function () {
             Route::post('/', [ClientController::class, 'create']);
-            Route::get('/', [ClientController::class, 'getAll']);
+            Route::get('/', [ClientController::class, 'search']);
             Route::get('/{id}', [ClientController::class, 'getById'])->where('id', '[0-9]+');
             Route::put('/{id}', [ClientController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/{id}', [ClientController::class, 'delete'])->where('id', '[0-9]+');

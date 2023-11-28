@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ClientCreateRequest;
 use App\Http\Requests\ClientUpdateRequest;
+use App\Http\Resources\ClientCollection;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,15 +32,38 @@ class ClientController extends Controller
     }
 
     /**
-     * Get all clients.
+     * Search clients with 'name', 'email' and 'phone' filters using
+     * like query, and paginate the results.
      *
-     * @return ClientResource
+     * @param  Request  $request
+     * @return ClientCollection
      */
-    public function getAll(): ClientResource
+    public function search(Request $request): ClientCollection
     {
-        $clients = Client::all();
+        $page = $request->input('page', 1);
+        $size = $request->input('size', 10);
 
-        return new ClientResource($clients);
+        $clients = Client::where(function (Builder $builder) use ($request) {
+            $name = $request->input('name');
+            $email = $request->input('email');
+            $phone = $request->input('phone');
+
+            if ($name) {
+                $builder->where('name', 'like', "%{$name}%");
+            }
+
+            if ($email) {
+                $builder->where('email', 'like', "%{$email}%");
+            }
+
+            if ($phone) {
+                $builder->where('phone', 'like', "%{$phone}%");
+            }
+        });
+
+        $clients = $clients->paginate(perPage: $size, page: $page);
+
+        return new ClientCollection($clients);
     }
 
     /**
