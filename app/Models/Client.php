@@ -13,6 +13,12 @@ class Client extends Model
     public $timestamps = true;
     public $incrementing = true;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+    ];
+
     /**
      * Get the projects for the client.
      */
