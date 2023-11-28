@@ -13,6 +13,9 @@ class Client extends Model
     public $timestamps = true;
     public $incrementing = true;
 
+    /**
+     * Get the projects for the client.
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class, 'client_id', 'id');

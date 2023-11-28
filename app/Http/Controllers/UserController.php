@@ -16,11 +16,19 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    /**
+     * Register a new user.
+     *
+     * @param  UserRegisterRequest  $request
+     * @return JsonResponse
+     *
+     * @throws HttpResponseException
+     */
     public function register(UserRegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        if (User::where('email', $data['email'])->count() == 1) {
+        if (User::where('email', $data['email'])->count() === 1) {
             throw new HttpResponseException(response([
                 "errors" => [
                     "message" => [
@@ -36,7 +44,15 @@ class UserController extends Controller
 
         return (new UserResource($user))->response()->setStatusCode(201);
     }
-    
+
+    /**
+     * Log in a user.
+     *
+     * @param  UserLoginRequest  $request
+     * @return UserResource
+     *
+     * @throws HttpResponseException
+     */
     public function login(UserLoginRequest $request): UserResource
     {
         $data = $request->validated();
@@ -59,12 +75,24 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
+    /**
+     * Get the authenticated user information.
+     *
+     * @param  Request  $request
+     * @return UserResource
+     */
     public function get(Request $request): UserResource
     {
         $user = Auth::user();
         return new UserResource($user);
     }
 
+    /**
+     * Log out the authenticated user.
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
     public function logout(Request $request): JsonResponse
     {
         $user = Auth::user();
