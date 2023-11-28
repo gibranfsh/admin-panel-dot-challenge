@@ -16,6 +16,31 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     /**
+     * Get client by idClient.
+     *
+     * @param  int  $idClient
+     * @return Client
+     *
+     * @throws HttpResponseException
+     */
+    private function getClient(int $idClient): Client
+    {
+        $client = Client::where('id', $idClient)->first();
+
+        if (!$client) {
+            throw new HttpResponseException(response()->json([
+                "errors" => [
+                    "message" => [
+                        "Client not found."
+                    ]
+                ]
+            ])->setStatusCode(404));
+        };
+
+        return $client;
+    }
+
+    /**
      * Create a new client.
      *
      * @param  ClientCreateRequest  $request
@@ -33,7 +58,7 @@ class ClientController extends Controller
 
     /**
      * Search clients with 'name', 'email' and 'phone' filters using
-     * like query, and paginate the results.
+     * 'like' query, and paginate the results.
      *
      * @param  Request  $request
      * @return ClientCollection
@@ -71,20 +96,12 @@ class ClientController extends Controller
      *
      * @param  int  $id
      * @return ClientResource
+     *
+     * @throws HttpResponseException
      */
     public function getById(int $id): ClientResource
     {
-        $client = Client::where('id', $id)->first();
-
-        if (!$client) {
-            throw new HttpResponseException(response()->json([
-                "errors" => [
-                    "message" => [
-                        "Client not found."
-                    ]
-                ]
-            ])->setStatusCode(404));
-        };
+        $client = $this->getClient($id);
 
         return new ClientResource($client);
     }
@@ -95,20 +112,12 @@ class ClientController extends Controller
      * @param  int  $id
      * @param  ClientUpdateRequest  $request
      * @return ClientResource
+     *
+     * @throws HttpResponseException
      */
     public function update(int $id, ClientUpdateRequest $request): ClientResource
     {
-        $client = Client::where('id', $id)->first();
-
-        if (!$client) {
-            throw new HttpResponseException(response()->json([
-                "errors" => [
-                    "message" => [
-                        "Client not found."
-                    ]
-                ]
-            ])->setStatusCode(404));
-        };
+        $client = $this->getClient($id);
 
         $data = $request->validated();
         $client->fill($data);
@@ -122,20 +131,12 @@ class ClientController extends Controller
      *
      * @param  int  $id
      * @return JsonResponse
+     *
+     * @throws HttpResponseException
      */
     public function delete(int $id): JsonResponse
     {
-        $client = Client::where('id', $id)->first();
-
-        if (!$client) {
-            throw new HttpResponseException(response()->json([
-                "errors" => [
-                    "message" => [
-                        "Client not found."
-                    ]
-                ]
-            ])->setStatusCode(404));
-        };
+        $client = $this->getClient($id);
 
         $client->delete();
 

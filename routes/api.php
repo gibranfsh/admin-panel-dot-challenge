@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ApiAuthMiddleware;
 use Illuminate\Http\Request;
@@ -35,6 +36,20 @@ Route::prefix('v1')->group(function () {
             Route::get('/{id}', [ClientController::class, 'getById'])->where('id', '[0-9]+');
             Route::put('/{id}', [ClientController::class, 'update'])->where('id', '[0-9]+');
             Route::delete('/{id}', [ClientController::class, 'delete'])->where('id', '[0-9]+');
+
+            Route::prefix('{idClient}/projects')->group(function () {
+                Route::post('/', [ProjectController::class, 'create'])->where('idClient', '[0-9]+');
+                Route::get('/', [ProjectController::class, 'getAll'])->where('idClient', '[0-9]+');
+                Route::get('/{idProject}', [ProjectController::class, 'get'])
+                    ->where('idClient', '[0-9]+')
+                    ->where('idProject', '[0-9]+');
+                Route::put('/{idProject}', [ProjectController::class, 'update'])
+                    ->where('idClient', '[0-9]+')
+                    ->where('idProject', '[0-9]+');
+                Route::delete('/{idProject}', [ProjectController::class, 'delete'])
+                    ->where('idClient', '[0-9]+')
+                    ->where('idProject', '[0-9]+');
+            });
         });
     });
 });

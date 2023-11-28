@@ -13,6 +13,15 @@ class Project extends Model
     public $timestamps = true;
     public $incrementing = true;
 
+    protected $fillable = [
+        'title',
+        'description',
+        'platform',
+        'status',
+        'start_date',
+        'end_date',
+    ];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
