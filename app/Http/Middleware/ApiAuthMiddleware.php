@@ -29,7 +29,9 @@ class ApiAuthMiddleware
             $authenticate = false;
         }
 
-        Auth::login($user);
+        if ($user) {
+            Auth::login($user);
+        }
 
         if ($authenticate) {
             return $next($request);

@@ -142,6 +142,6 @@ class ClientController extends Controller
 
         return response()->json([
             "message" => "Client successfully deleted."
-        ])->setStatusCode(204);
+        ])->setStatusCode(200);
     }
 }

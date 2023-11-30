@@ -165,6 +165,6 @@ class ProjectController extends Controller
 
         return response()->json([
             "message" => "Project successfully deleted."
-        ])->setStatusCode(204);
+        ])->setStatusCode(200);
     }
 }

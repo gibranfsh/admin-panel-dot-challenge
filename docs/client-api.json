@@ -329,7 +329,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
+                    "200": {
                         "description": "Successfully deleted a client by id",
                         "content": {
                             "application/json": {

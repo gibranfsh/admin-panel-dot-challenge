@@ -397,7 +397,7 @@
                     }
                 ],
                 "responses": {
-                    "204": {
+                    "200": {
                         "description": "Successfully deleted a project by id",
                         "content": {
                             "application/json": {

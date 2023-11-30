@@ -116,7 +116,7 @@ const ClientsTable = () => {
                 `/api/v1/clients/${selectedClient?.id}`
             );
 
-            if (res.status === 204) {
+            if (res.status === 200) {
                 toast.success("Client deleted successfully");
                 setShowDeleteModal(false);
                 // mutate

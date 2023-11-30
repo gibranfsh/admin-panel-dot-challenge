@@ -23,12 +23,13 @@ class ProjectUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $projectId = $this->route('id');
         return [
-            'title' => ['required', 'max:50'],
-            'description' => ['required', 'max:300'],
-            'platform' => ['required', 'max:15'],
-            'status' => ['required', 'max:13'],
-            'start_date' => ['required', 'date'],
+            'title' => ['max:50', 'unique:projects,title,' . $projectId],
+            'description' => ['max:300'],
+            'platform' => ['max:15'],
+            'status' => ['max:13'],
+            'start_date' => ['date'],
             'end_date' => ['nullable', 'date'],
         ];
     }
