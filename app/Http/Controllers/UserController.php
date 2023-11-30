@@ -63,7 +63,7 @@ class UserController extends Controller
             throw new HttpResponseException(response([
                 "errors" => [
                     "message" => [
-                        "email or password is incorrect"
+                        "Email or password is incorrect"
                     ]
                 ]
             ], 401));
@@ -84,6 +84,17 @@ class UserController extends Controller
     public function get(Request $request): UserResource
     {
         $user = Auth::user();
+
+        if (!$user) {
+            throw new HttpResponseException(response([
+                "errors" => [
+                    "message" => [
+                        "Unauthenticated"
+                    ]
+                ]
+            ], 401));
+        }
+
         return new UserResource($user);
     }
 

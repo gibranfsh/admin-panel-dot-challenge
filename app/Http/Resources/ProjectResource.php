@@ -17,10 +17,12 @@ class ProjectResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'description' => $this->description,
             'platform' => $this->platform,
             'status' => $this->status,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
+            'created_at' => $this->created_at,
         ];
     }
 }

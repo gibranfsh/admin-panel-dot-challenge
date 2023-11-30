@@ -23,10 +23,12 @@ class ClientUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $clientId = $this->route('id');
+
         return [
-            'name' => ['required', 'max:50'],
-            'email' => ['required', 'max:50', 'unique:clients,email'],
-            'phone' => ['required', 'max:13', 'unique:clients,phone'],
+            'name' => ['max:50'],
+            'email' => ['max:50', 'unique:clients,email,' . $clientId],
+            'phone' => ['max:13', 'unique:clients,phone,' . $clientId],
         ];
     }
 

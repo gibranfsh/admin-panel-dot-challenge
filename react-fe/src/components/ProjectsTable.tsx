@@ -1,29 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const dummyProjects: Project[] = [
-    {
-        id: 1,
-        title: "Project 1",
-        description: "Description for Project 1",
-        platform: "Web",
-        status: "ON_PROGRESS",
-        start_date: "2023-02-01",
-        end_date: "2023-02-15",
-        created_at: "2023-02-01",
-    },
-    {
-        id: 2,
-        title: "Project 2",
-        description: "Description for Project 2",
-        platform: "Mobile",
-        status: "FINISHED",
-        start_date: "2023-02-02",
-        end_date: "2023-02-20",
-        created_at: "2023-02-02",
-    },
-    // Add more dummy data as needed
-];
+import { useStateContext } from "../contexts/ContextProvider";
+import { useParams } from "react-router-dom";
+import axiosClient from "../axios-client";
+import useSWR, { mutate } from "swr";
+import toast from "react-hot-toast";
+import { convertISODateToFormattedString } from "./Route";
+import Loader from "./Loader";
 
 interface Project {
     id: number;
@@ -37,6 +20,7 @@ interface Project {
 }
 
 const ProjectsTable = () => {
+    const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -52,20 +36,98 @@ const ProjectsTable = () => {
         end_date: "",
     });
     const navigate = useNavigate();
+    const { token } = useStateContext();
+    const { id } = useParams();
 
-    const handleCreate = () => {
-        console.log(newProjectData);
-        setShowCreateModal(false);
+    const { data: projectsData } = useSWR(
+        token && id ? `/api/v1/clients/${id}/projects` : null,
+        (url) =>
+            axiosClient.get(url).then((response) => {
+                setIsLoading(false);
+                return response.data.data as Project[];
+            })
+    );
+
+    const handleCreate = async () => {
+        // send API POST request to /api/v1/clients/:id/projects
+        try {
+            const res = await axiosClient.post(
+                `/api/v1/clients/${id}/projects`,
+                newProjectData
+            );
+
+            if (res.status === 201) {
+                toast.success("Client created successfully");
+                setNewProjectData({
+                    title: "",
+                    description: "",
+                    platform: "",
+                    status: "ON_PROGRESS",
+                    start_date: "",
+                    end_date: "",
+                });
+                setShowCreateModal(false);
+                await mutate(`/api/v1/clients/${id}/projects`);
+            } else {
+                toast.error("Error creating client");
+            }
+        } catch (error) {
+            const errorResponse = Object.values(
+                errors.response.data.errors
+            ).join(" ");
+            toast.error(errorResponse);
+            console.error(error);
+            setShowCreateModal(false);
+        }
     };
 
-    const handleEdit = () => {
-        console.log(selectedProject);
-        setShowEditModal(false);
+    const handleEdit = async () => {
+        // send API PUT request to /api/v1/clients/:id/projects/:id
+        try {
+            const res = await axiosClient.put(
+                `/api/v1/clients/${id}/projects/${selectedProject?.id}`,
+                selectedProject
+            );
+
+            if (res.status === 200) {
+                toast.success("Project updated successfully");
+                setShowEditModal(false);
+                await mutate(`/api/v1/clients/${id}/projects`);
+            } else {
+                toast.error("Error updating project");
+            }
+        } catch (error) {
+            const errorResponse = Object.values(
+                errors.response.data.errors
+            ).join(" ");
+            toast.error(errorResponse);
+            console.error(error);
+            setShowEditModal(false);
+        }
     };
 
-    const handleDelete = () => {
-        console.log(selectedProject);
-        setShowDeleteModal(false);
+    const handleDelete = async () => {
+        // send API DELETE request to /api/v1/clients/:id/projects/:id
+        try {
+            const res = await axiosClient.delete(
+                `/api/v1/clients/${id}/projects/${selectedProject?.id}`
+            );
+
+            if (res.status === 200) {
+                toast.success("Project deleted successfully");
+                setShowDeleteModal(false);
+                await mutate(`/api/v1/clients/${id}/projects`);
+            } else {
+                toast.error("Error deleting project");
+            }
+        } catch (error) {
+            const errorResponse = Object.values(
+                errors.response.data.errors
+            ).join(" ");
+            toast.error(errorResponse);
+            console.error(error);
+            setShowDeleteModal(false);
+        }
     };
 
     const openCreateModal = () => setShowCreateModal(true);
@@ -111,36 +173,70 @@ const ProjectsTable = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {dummyProjects.map((project) => (
-                        <tr
-                            key={project.id}
-                            className="border-b cursor-pointer hover:shadow-md transition"
-                        >
-                            <td className="border p-3">{project.title}</td>
-                            <td className="border p-3">
-                                {project.description}
-                            </td>
-                            <td className="border p-3">{project.platform}</td>
-                            <td className="border p-3">{project.status}</td>
-                            <td className="border p-3">{project.start_date}</td>
-                            <td className="border p-3">{project.end_date}</td>
-                            <td className="border p-3">{project.created_at}</td>
-                            <td className="border p-3">
-                                <button
-                                    className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                                    onClick={() => openEditModal(project)}
+                    {!isLoading ? (
+                        projectsData?.length && projectsData?.length > 0 ? (
+                            projectsData?.map((project: Project) => (
+                                <tr
+                                    key={project.id}
+                                    className="border-b cursor-pointer hover:shadow-md transition"
                                 >
-                                    Edit
-                                </button>
-                                <button
-                                    className="bg-red-500 text-white px-2 py-1 rounded mr-2"
-                                    onClick={() => openDeleteModal(project)}
-                                >
-                                    Delete
-                                </button>
+                                    <td className="border p-3">
+                                        {project.title}
+                                    </td>
+                                    <td className="border p-3">
+                                        {project.description}
+                                    </td>
+                                    <td className="border p-3">
+                                        {project.platform}
+                                    </td>
+                                    <td className="border p-3">
+                                        {project.status}
+                                    </td>
+                                    <td className="border p-3">
+                                        {project.start_date}
+                                    </td>
+                                    <td className="border p-3">
+                                        {project.end_date}
+                                    </td>
+                                    <td className="border p-3">
+                                        {convertISODateToFormattedString(
+                                            new Date(project.created_at)
+                                        )}
+                                    </td>
+                                    <td className="border p-3">
+                                        <button
+                                            className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                                            onClick={() =>
+                                                openEditModal(project)
+                                            }
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="bg-red-500 text-white px-2 py-1 rounded mr-2"
+                                            onClick={() =>
+                                                openDeleteModal(project)
+                                            }
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={8} className="text-center p-5">
+                                    No projects found.
+                                </td>
+                            </tr>
+                        )
+                    ) : (
+                        <tr>
+                            <td colSpan={8}>
+                                <Loader />
                             </td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </table>
 

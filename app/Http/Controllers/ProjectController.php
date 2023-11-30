@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectCreateRequest;
 use App\Http\Requests\ProjectUpdateRequest;
-use App\Http\Resources\ClientResource;
 use App\Http\Resources\ProjectResource;
 use App\Models\Client;
 use App\Models\Project;
@@ -84,7 +83,7 @@ class ProjectController extends Controller
         $project->client_id = $client->id;
         $project->save();
 
-        return (new ClientResource($client))->response()->setStatusCode(201);
+        return (new ProjectResource($project))->response()->setStatusCode(201);
     }
 
     /**

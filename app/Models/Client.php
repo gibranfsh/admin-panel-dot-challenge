@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
-    protected $table = 'users';
+    protected $table = 'clients';
     protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $timestamps = true;

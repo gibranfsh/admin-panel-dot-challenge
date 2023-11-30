@@ -1,42 +1,48 @@
 import { FormEvent, useState } from "react";
+import axiosClient from "../axios-client";
+import { useStateContext } from "../contexts/ContextProvider";
 import toast from "react-hot-toast";
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { setUser, setToken } = useStateContext();
 
-    const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log("Login form submitted", email, password);
-        // try {
-        //     e.preventDefault();
+        try {
+            e.preventDefault();
 
-        //     const res = await signIn('credentials', {
-        //         redirect: false,
-        //         email,
-        //         password,
-        //         callbackUrl: '/'
-        //     });
-
-        //     if (res?.error) {
-        //         toast.error(res.error);
-        //         throw new Error(res.error);
-        //     } else {
-        //         toast.success("Login Success.");
-        //         router.push('/');
-        //         router.refresh();
-        //     }
-        // } catch (error) {
-        //     toast.error("Error logging in.");
-        //     console.error(error);
-        // }
+            await axiosClient
+                .post("/api/v1/users/login", {
+                    email,
+                    password,
+                })
+                .then(({ data }) => {
+                    setToken(data.data.token);
+                    setUser({
+                        id: data.data.id,
+                        name: data.data.name,
+                        email: data.data.email,
+                    });
+                })
+                .catch((err) => {
+                    const response = err.response;
+                    if (response.status === 401) {
+                        toast.error("Email or password is incorrect.");
+                    } else {
+                        toast.error("Error logging in.");
+                    }
+                });
+        } catch (error) {
+            toast.error("Error logging in.");
+            console.error(error);
+        }
     };
 
     return (
-        <form
-        className="max-w-md mx-auto mt-8"
-        onSubmit={handleLogin}
-        >
+        <form className="max-w-md mx-auto mt-8" onSubmit={handleLogin}>
             <div className="mb-4">
                 <label
                     htmlFor="email"
