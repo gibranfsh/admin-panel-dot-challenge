@@ -76,14 +76,23 @@ class ProjectController extends Controller
      */
     public function create(int $idClient, ProjectCreateRequest $request): JsonResponse
     {
-        $client = $this->getClient($idClient);
+        try {
+            $client = $this->getClient($idClient);
 
-        $data = $request->validated();
-        $project = new Project($data);
-        $project->client_id = $client->id;
-        $project->save();
+            $data = $request->validated();
+            $project = new Project($data);
+            $project->client_id = $client->id;
+            $project->save();
 
-        return (new ProjectResource($project))->response()->setStatusCode(201);
+            return (new ProjectResource($project))->response()->setStatusCode(201);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during project creation."]
+                ]
+            ], 500);
+        }
     }
 
     /**
@@ -96,13 +105,22 @@ class ProjectController extends Controller
      */
     public function getAll(int $idClient): JsonResponse
     {
-        $client = $this->getClient($idClient);
+        try {
+            $client = $this->getClient($idClient);
 
-        $projects = Project::where('client_id', $client->id)->get();
+            $projects = Project::where('client_id', $client->id)->get();
 
-        return response()->json([
-            "data" => ProjectResource::collection($projects)
-        ])->setStatusCode(200);
+            return response()->json([
+                "data" => ProjectResource::collection($projects)
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred while fetching projects."]
+                ]
+            ], 500);
+        }
     }
 
     /**
@@ -117,10 +135,19 @@ class ProjectController extends Controller
      */
     public function get(int $idClient, int $idProject): ProjectResource
     {
-        $client = $this->getClient($idClient);
-        $project = $this->getProject($client, $idProject);
+        try {
+            $client = $this->getClient($idClient);
+            $project = $this->getProject($client, $idProject);
 
-        return new ProjectResource($project);
+            return new ProjectResource($project);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred while fetching project."]
+                ]
+            ], 500);
+        }
     }
 
     /**
@@ -136,14 +163,23 @@ class ProjectController extends Controller
      */
     public function update(int $idClient, int $idProject, ProjectUpdateRequest $request): ProjectResource
     {
-        $client = $this->getClient($idClient);
-        $project = $this->getProject($client, $idProject);
+        try {
+            $client = $this->getClient($idClient);
+            $project = $this->getProject($client, $idProject);
 
-        $data = $request->validated();
-        $project->fill($data);
-        $project->save();
+            $data = $request->validated();
+            $project->fill($data);
+            $project->save();
 
-        return new ProjectResource($project);
+            return new ProjectResource($project);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during project update."]
+                ]
+            ], 500);
+        }
     }
 
     /**
@@ -158,13 +194,22 @@ class ProjectController extends Controller
      */
     public function delete(int $idClient, int $idProject): JsonResponse
     {
-        $client = $this->getClient($idClient);
-        $project = $this->getProject($client, $idProject);
+        try {
+            $client = $this->getClient($idClient);
+            $project = $this->getProject($client, $idProject);
 
-        $project->delete();
+            $project->delete();
 
-        return response()->json([
-            "message" => "Project successfully deleted."
-        ])->setStatusCode(200);
+            return response()->json([
+                "message" => "Project successfully deleted."
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during project deletion."]
+                ]
+            ], 500);
+        }
     }
 }
