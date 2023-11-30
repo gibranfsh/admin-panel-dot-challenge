@@ -85,9 +85,6 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object"
-                                        },
                                         "errors": {
                                             "type": "object",
                                             "properties": {
@@ -206,9 +203,6 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object"
-                                        },
                                         "errors": {
                                             "type": "object",
                                             "properties": {
@@ -308,9 +302,6 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object"
-                                        },
                                         "errors": {
                                             "type": "object",
                                             "properties": {
@@ -474,9 +465,6 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "object"
-                                        },
                                         "errors": {
                                             "type": "object",
                                             "properties": {

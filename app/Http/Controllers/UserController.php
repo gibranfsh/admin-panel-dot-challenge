@@ -26,23 +26,32 @@ class UserController extends Controller
      */
     public function register(UserRegisterRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        if (User::where('email', $data['email'])->count() === 1) {
-            throw new HttpResponseException(response([
-                "errors" => [
-                    "message" => [
-                        "Email already exists"
+            if (User::where('email', $data['email'])->exists()) {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        "message" => [
+                            "Email already exists"
+                        ]
                     ]
+                ], 400));
+            }
+
+            $user = new User($data);
+            $user->password = Hash::make($data['password']);
+            $user->save();
+
+            return (new UserResource($user))->response()->setStatusCode(201);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during registration."]
                 ]
-            ], 400));
+            ], 500);
         }
-
-        $user = new User($data);
-        $user->password = Hash::make($data['password']);
-        $user->save();
-
-        return (new UserResource($user))->response()->setStatusCode(201);
     }
 
     /**
@@ -55,24 +64,33 @@ class UserController extends Controller
      */
     public function login(UserLoginRequest $request): UserResource
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        $user = User::where('email', $data['email'])->first();
+            $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            throw new HttpResponseException(response([
-                "errors" => [
-                    "message" => [
-                        "Email or password is incorrect"
+            if (!$user || !Hash::check($data['password'], $user->password)) {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        "message" => [
+                            "Email or password is incorrect"
+                        ]
                     ]
+                ], 401));
+            }
+
+            $user->token = Str::uuid()->toString();
+            $user->save();
+
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during login."]
                 ]
-            ], 401));
+            ], 500);
         }
-
-        $user->token = Str::uuid()->toString();
-        $user->save();
-
-        return new UserResource($user);
     }
 
     /**
@@ -83,19 +101,28 @@ class UserController extends Controller
      */
     public function get(Request $request): UserResource
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        if (!$user) {
-            throw new HttpResponseException(response([
-                "errors" => [
-                    "message" => [
-                        "Unauthenticated"
+            if (!$user) {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        "message" => [
+                            "Unauthenticated"
+                        ]
                     ]
-                ]
-            ], 401));
-        }
+                ], 401));
+            }
 
-        return new UserResource($user);
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred while fetching user information."]
+                ]
+            ], 500);
+        }
     }
 
     /**
@@ -106,16 +133,34 @@ class UserController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $user->token = null;
-        $user->save();
+        try {
+            $user = Auth::user();
 
-        return response()->json([
-            "data" => [
-                "message" => [
-                    "Successfully logged out"
+            if (!$user) {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        "message" => ["User not found"]
+                    ]
+                ], 404));
+            }
+
+            $user->token = null;
+            $user->save();
+
+            return response()->json([
+                "data" => [
+                    "message" => [
+                        "Successfully logged out"
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => ["An error occurred during logout."]
+                ]
+            ], 500);
+        }
     }
 }
