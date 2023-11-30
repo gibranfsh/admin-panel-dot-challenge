@@ -48,12 +48,23 @@ class ClientController extends Controller
      */
     public function create(ClientCreateRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        $client = new Client($data);
-        $client->save();
+            $client = new Client($data);
+            $client->save();
 
-        return (new ClientResource($client))->response()->setStatusCode(201);
+            return (new ClientResource($client))->response()->setStatusCode(201);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => [
+                        "Error creating client."
+                    ]
+                ]
+            ])->setStatusCode(500);
+        }
     }
 
     /**
@@ -65,30 +76,41 @@ class ClientController extends Controller
      */
     public function search(Request $request): ClientCollection
     {
-        $page = $request->input('page', 1);
-        $size = $request->input('size', 10);
+        try {
+            $page = $request->input('page', 1);
+            $size = $request->input('size', 10);
 
-        $clients = Client::where(function (Builder $builder) use ($request) {
-            $name = $request->input('name');
-            $email = $request->input('email');
-            $phone = $request->input('phone');
+            $clients = Client::where(function (Builder $builder) use ($request) {
+                $name = $request->input('name');
+                $email = $request->input('email');
+                $phone = $request->input('phone');
 
-            if ($name) {
-                $builder->where('name', 'like', "%{$name}%");
-            }
+                if ($name) {
+                    $builder->where('name', 'like', "%{$name}%");
+                }
 
-            if ($email) {
-                $builder->where('email', 'like', "%{$email}%");
-            }
+                if ($email) {
+                    $builder->where('email', 'like', "%{$email}%");
+                }
 
-            if ($phone) {
-                $builder->where('phone', 'like', "%{$phone}%");
-            }
-        });
+                if ($phone) {
+                    $builder->where('phone', 'like', "%{$phone}%");
+                }
+            });
 
-        $clients = $clients->paginate(perPage: $size, page: $page);
+            $clients = $clients->paginate(perPage: $size, page: $page);
 
-        return new ClientCollection($clients);
+            return new ClientCollection($clients);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => [
+                        "Error searching clients."
+                    ]
+                ]
+            ])->setStatusCode(500);
+        }
     }
 
     /**
@@ -101,9 +123,20 @@ class ClientController extends Controller
      */
     public function getById(int $id): ClientResource
     {
-        $client = $this->getClient($id);
+        try {
+            $client = $this->getClient($id);
 
-        return new ClientResource($client);
+            return new ClientResource($client);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => [
+                        "Error getting client by ID."
+                    ]
+                ]
+            ])->setStatusCode(500);
+        }
     }
 
     /**
@@ -117,13 +150,24 @@ class ClientController extends Controller
      */
     public function update(int $id, ClientUpdateRequest $request): ClientResource
     {
-        $client = $this->getClient($id);
+        try {
+            $client = $this->getClient($id);
 
-        $data = $request->validated();
-        $client->fill($data);
-        $client->save();
+            $data = $request->validated();
+            $client->fill($data);
+            $client->save();
 
-        return new ClientResource($client);
+            return new ClientResource($client);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => [
+                        "Error updating client."
+                    ]
+                ]
+            ])->setStatusCode(500);
+        }
     }
 
     /**
@@ -136,12 +180,23 @@ class ClientController extends Controller
      */
     public function delete(int $id): JsonResponse
     {
-        $client = $this->getClient($id);
+        try {
+            $client = $this->getClient($id);
 
-        $client->delete();
+            $client->delete();
 
-        return response()->json([
-            "message" => "Client successfully deleted."
-        ])->setStatusCode(200);
+            return response()->json([
+                "message" => "Client successfully deleted."
+            ])->setStatusCode(200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "errors" => [
+                    "message" => [
+                        "Error deleting client."
+                    ]
+                ]
+            ])->setStatusCode(500);
+        }
     }
 }
