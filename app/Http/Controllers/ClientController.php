@@ -129,6 +129,12 @@ class ClientController extends Controller
             return new ClientResource($client);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => [
@@ -160,6 +166,12 @@ class ClientController extends Controller
             return new ClientResource($client);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => [
@@ -190,6 +202,12 @@ class ClientController extends Controller
             ])->setStatusCode(200);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => [
