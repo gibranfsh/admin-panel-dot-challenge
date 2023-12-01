@@ -87,6 +87,12 @@ class ProjectController extends Controller
             return (new ProjectResource($project))->response()->setStatusCode(201);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => ["An error occurred during project creation."]
@@ -115,6 +121,12 @@ class ProjectController extends Controller
             ])->setStatusCode(200);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => ["An error occurred while fetching projects."]
@@ -142,6 +154,12 @@ class ProjectController extends Controller
             return new ProjectResource($project);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => ["An error occurred while fetching project."]
@@ -174,6 +192,12 @@ class ProjectController extends Controller
             return new ProjectResource($project);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+
             return response()->json([
                 "errors" => [
                     "message" => ["An error occurred during project update."]
@@ -205,6 +229,12 @@ class ProjectController extends Controller
             ])->setStatusCode(200);
         } catch (\Exception $e) {
             report($e);
+
+            // check if exception is instance of HttpResponseException
+            if ($e instanceof HttpResponseException) {
+                throw $e;
+            }
+            
             return response()->json([
                 "errors" => [
                     "message" => ["An error occurred during project deletion."]
